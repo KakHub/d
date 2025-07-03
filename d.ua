@@ -79,21 +79,6 @@ local function CreateGradient(parent, colors, rotation)
     return gradient
 end
 
-local function CreateShadow(parent, size, offset, color, transparency)
-    local shadow = Instance.new("ImageLabel")
-    shadow.Name = "Shadow"
-    shadow.Size = size or UDim2.new(1, 20, 1, 20)
-    shadow.Position = offset or UDim2.fromOffset(-10, -10)
-    shadow.BackgroundTransparency = 1
-    shadow.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-    shadow.ImageColor3 = color or Theme.Shadow
-    shadow.ImageTransparency = transparency or 0.7
-    shadow.ZIndex = (parent.ZIndex or 1) - 1
-    shadow.Parent = parent.Parent or parent
-    CreateCorner(shadow, 12)
-    return shadow
-end
-
 local function CreatePadding(parent, all, top, bottom, left, right)
     local padding = Instance.new("UIPadding")
     if all then
@@ -139,9 +124,7 @@ function FluentUI:CreateWindow(config)
     MainContainer.BorderSizePixel = 0
     MainContainer.Parent = ScreenGui
     
-    -- Shadow Effect
-    CreateShadow(MainContainer, UDim2.new(1, 40, 1, 40), UDim2.fromOffset(-20, -20))
-    
+
     -- Main Frame with blur effect
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
@@ -152,20 +135,6 @@ function FluentUI:CreateWindow(config)
     
     CreateCorner(MainFrame, 16)
     CreateStroke(MainFrame, Theme.BorderLight, 1, 0.3)
-    
-    -- Acrylic blur effect
-    if config.Acrylic then
-        local BlurEffect = Instance.new("BlurEffect")
-        BlurEffect.Size = 25
-        BlurEffect.Parent = game.Lighting
-        
-        -- Clean up blur when UI is destroyed
-        ScreenGui.AncestryChanged:Connect(function()
-            if not ScreenGui.Parent then
-                BlurEffect:Destroy()
-            end
-        end)
-    end
     
     -- Title Bar with gradient
     local TitleBar = Instance.new("Frame")
@@ -857,8 +826,7 @@ function FluentUI:CreateWindow(config)
             
             CreateCorner(DropdownList, 10)
             CreateStroke(DropdownList, Theme.BorderLight, 1)
-            CreateShadow(DropdownList, UDim2.new(1, 20, 1, 20), UDim2.fromOffset(-10, -10))
-            
+   
             local ListScrollFrame = Instance.new("ScrollingFrame")
             ListScrollFrame.Name = "ListScrollFrame"
             ListScrollFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -1328,7 +1296,6 @@ function FluentUI:CreateWindow(config)
         
         CreateCorner(DialogFrame, 16)
         CreateStroke(DialogFrame, Theme.BorderLight, 2)
-        CreateShadow(DialogFrame, UDim2.new(1, 40, 1, 40), UDim2.fromOffset(-20, -20))
         CreatePadding(DialogFrame, 20)
         
         local DialogTitle = Instance.new("TextLabel")
@@ -1446,7 +1413,6 @@ function FluentUI:CreateWindow(config)
         
         CreateCorner(NotificationFrame, 12)
         CreateStroke(NotificationFrame, Theme.BorderLight, 1)
-        CreateShadow(NotificationFrame, UDim2.new(1, 20, 1, 20), UDim2.fromOffset(-10, -10))
         CreatePadding(NotificationFrame, 15)
         
         local NotificationIcon = Instance.new("TextLabel")
@@ -1536,7 +1502,6 @@ function FluentUI:Notify(config)
     
     CreateCorner(NotificationFrame, 12)
     CreateStroke(NotificationFrame, Theme.BorderLight, 1)
-    CreateShadow(NotificationFrame, UDim2.new(1, 20, 1, 20), UDim2.fromOffset(-10, -10))
     CreatePadding(NotificationFrame, 15)
     
     local typeColors = {
