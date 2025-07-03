@@ -615,163 +615,169 @@ function FluentUI:CreateWindow(config)
             return Toggle
         end
         
-        function Tab:AddSlider(config)
-            local SliderFrame = Instance.new("Frame")
-            SliderFrame.Name = "SliderFrame"
-            SliderFrame.Size = UDim2.new(1, 0, 0, 70)
-            SliderFrame.BackgroundColor3 = Theme.Surface
-            SliderFrame.BorderSizePixel = 0
-            SliderFrame.Parent = TabContent
+      function Tab:AddSlider(config)
+        local SliderFrame = Instance.new("Frame")
+        SliderFrame.Name = "SliderFrame"
+        SliderFrame.Size = UDim2.new(1, 0, 0, 70)
+        SliderFrame.BackgroundColor3 = Theme.Surface
+        SliderFrame.BorderSizePixel = 0
+        SliderFrame.Parent = TabContent
+        
+        CreateCorner(SliderFrame, 10)
+        CreateStroke(SliderFrame, Theme.Border, 1, 0.5)
+        CreatePadding(SliderFrame, 15)
+        
+        local SliderLabel = Instance.new("TextLabel")
+        SliderLabel.Name = "SliderLabel"
+        SliderLabel.Size = UDim2.new(1, -60, 0, 20)
+        SliderLabel.BackgroundTransparency = 1
+        SliderLabel.Text = config.Title or "Slider"
+        SliderLabel.TextColor3 = Theme.Text
+        SliderLabel.TextSize = 16
+        SliderLabel.Font = Enum.Font.GothamSemibold
+        SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+        SliderLabel.Parent = SliderFrame
+        
+        local ValueLabel = Instance.new("TextLabel")
+        ValueLabel.Name = "ValueLabel"
+        ValueLabel.Size = UDim2.fromOffset(60, 20)
+        ValueLabel.Position = UDim2.new(1, -60, 0, 0)
+        ValueLabel.BackgroundTransparency = 1
+        ValueLabel.Text = tostring(config.Default or config.Min or 0)
+        ValueLabel.TextColor3 = Theme.Primary
+        ValueLabel.TextSize = 14
+        ValueLabel.Font = Enum.Font.GothamBold
+        ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+        ValueLabel.Parent = SliderFrame
+        
+        -- Description
+        if config.Description then
+            SliderFrame.Size = UDim2.new(1, 0, 0, 85)
             
-            CreateCorner(SliderFrame, 10)
-            CreateStroke(SliderFrame, Theme.Border, 1, 0.5)
-            CreatePadding(SliderFrame, 15)
-            
-            local SliderLabel = Instance.new("TextLabel")
-            SliderLabel.Name = "SliderLabel"
-            SliderLabel.Size = UDim2.new(1, -60, 0, 20)
-            SliderLabel.BackgroundTransparency = 1
-            SliderLabel.Text = config.Title or "Slider"
-            SliderLabel.TextColor3 = Theme.Text
-            SliderLabel.TextSize = 16
-            SliderLabel.Font = Enum.Font.GothamSemibold
-            SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
-            SliderLabel.Parent = SliderFrame
-            
-            local ValueLabel = Instance.new("TextLabel")
-            ValueLabel.Name = "ValueLabel"
-            ValueLabel.Size = UDim2.fromOffset(60, 20)
-            ValueLabel.Position = UDim2.new(1, -60, 0, 0)
-            ValueLabel.BackgroundTransparency = 1
-            ValueLabel.Text = tostring(config.Default or config.Min or 0)
-            ValueLabel.TextColor3 = Theme.Primary
-            ValueLabel.TextSize = 14
-            ValueLabel.Font = Enum.Font.GothamBold
-            ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
-            ValueLabel.Parent = SliderFrame
-            
-            -- Description
-            if config.Description then
-                SliderFrame.Size = UDim2.new(1, 0, 0, 85)
-                
-                local Description = Instance.new("TextLabel")
-                Description.Name = "Description"
-                Description.Size = UDim2.new(1, 0, 0, 15)
-                Description.Position = UDim2.fromOffset(0, 20)
-                Description.BackgroundTransparency = 1
-                Description.Text = config.Description
-                Description.TextColor3 = Theme.TextMuted
-                Description.TextSize = 12
-                Description.Font = Enum.Font.Gotham
-                Description.TextXAlignment = Enum.TextXAlignment.Left
-                Description.Parent = SliderFrame
-            end
-            
-            local SliderTrack = Instance.new("Frame")
-            SliderTrack.Name = "SliderTrack"
-            SliderTrack.Size = UDim2.new(1, 0, 0, 6)
-            SliderTrack.Position = UDim2.fromOffset(0, config.Description and 45 or 30)
-            SliderTrack.BackgroundColor3 = Theme.Border
-            SliderTrack.BorderSizePixel = 0
-            SliderTrack.Parent = SliderFrame
-            
-            CreateCorner(SliderTrack, 3)
-            
-            local SliderFill = Instance.new("Frame")
-            SliderFill.Name = "SliderFill"
-            SliderFill.Size = UDim2.new(0, 0, 1, 0)
-            SliderFill.BackgroundColor3 = Theme.Primary
-            SliderFill.BorderSizePixel = 0
-            SliderFill.Parent = SliderTrack
-            
-            CreateCorner(SliderFill, 3)
-            CreateGradient(SliderFill, ColorSequence.new{
-                ColorSequenceKeypoint.new(0, Theme.Primary),
-                ColorSequenceKeypoint.new(1, Theme.Accent)
-            }, 45)
-            
-            local SliderHandle = Instance.new("Frame")
-            SliderHandle.Name = "SliderHandle"
-            SliderHandle.Size = UDim2.fromOffset(20, 20)
-            SliderHandle.Position = UDim2.fromOffset(-7, -7)
-            SliderHandle.BackgroundColor3 = Theme.Text
-            SliderHandle.BorderSizePixel = 0
-            SliderHandle.Parent = SliderFill
-            
-            CreateCorner(SliderHandle, 10)
-            CreateStroke(SliderHandle, Theme.Primary, 2)
-            
-            local min = config.Min or 0
-            local max = config.Max or 100
-            local value = config.Default or min
-            local rounding = config.Rounding or 1
-            local dragging = false
-            
-            local function UpdateSlider()
-                local percent = (value - min) / (max - min)
-                SliderFill.Size = UDim2.new(percent, 0, 1, 0)
-                
-                local roundedValue = math.floor(value * (10 ^ rounding)) / (10 ^ rounding)
-                ValueLabel.Text = tostring(roundedValue)
-                
-                if config.Callback then
-                    config.Callback(roundedValue)
-                end
-            end
-            
-            local function SetValue(newValue)
-                value = math.clamp(newValue, min, max)
-                UpdateSlider()
-            end
-            
-            SliderTrack.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = true
-                    local percent = math.clamp((input.Position.X - SliderTrack.AbsolutePosition.X) / SliderTrack.AbsoluteSize.X, 0, 1)
-                    SetValue(min + (max - min) * percent)
-                end
-            end)
-            
-            UserInputService.InputChanged:Connect(function(input)
-                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                    local percent = math.clamp((input.Position.X - SliderTrack.AbsolutePosition.X) / SliderTrack.AbsoluteSize.X, 0, 1)
-                    SetValue(min + (max - min) * percent)
-                end
-            end)
-            
-            UserInputService.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = false
-                end
-            end)
-            
-            -- Hover effects
-            SliderHandle.MouseEnter:Connect(function()
-                CreateTween(SliderHandle, TweenInfo.new(0.2), {Size = UDim2.fromOffset(24, 24), Position = UDim2.fromOffset(-9, -9)})
-            end)
-            
-            SliderHandle.MouseLeave:Connect(function()
-                if not dragging then
-                    CreateTween(SliderHandle, TweenInfo.new(0.2), {Size = UDim2.fromOffset(20, 20), Position = UDim2.fromOffset(-7, -7)})
-                end
-            end)
-            
-            UpdateSlider()
-            
-            local Slider = {
-                Value = value,
-                OnChanged = function(self, callback)
-                    config.Callback = callback
-                end,
-                SetValue = function(self, newValue)
-                    SetValue(newValue)
-                    self.Value = value
-                end
-            }
-            
-            UpdateCanvasSize()
-            return Slider
+            local Description = Instance.new("TextLabel")
+            Description.Name = "Description"
+            Description.Size = UDim2.new(1, 0, 0, 15)
+            Description.Position = UDim2.fromOffset(0, 20)
+            Description.BackgroundTransparency = 1
+            Description.Text = config.Description
+            Description.TextColor3 = Theme.TextMuted
+            Description.TextSize = 12
+            Description.Font = Enum.Font.Gotham
+            Description.TextXAlignment = Enum.TextXAlignment.Left
+            Description.Parent = SliderFrame
         end
+        
+        local SliderTrack = Instance.new("Frame")
+        SliderTrack.Name = "SliderTrack"
+        SliderTrack.Size = UDim2.new(1, 0, 0, 6)
+        SliderTrack.Position = UDim2.fromOffset(0, config.Description and 45 or 30)
+        SliderTrack.BackgroundColor3 = Theme.Border
+        SliderTrack.BorderSizePixel = 0
+        SliderTrack.Parent = SliderFrame
+        
+        CreateCorner(SliderTrack, 3)
+        
+        local SliderFill = Instance.new("Frame")
+        SliderFill.Name = "SliderFill"
+        SliderFill.Size = UDim2.new(0, 0, 1, 0)
+        SliderFill.BackgroundColor3 = Theme.Primary
+        SliderFill.BorderSizePixel = 0
+        SliderFill.Parent = SliderTrack
+        
+        CreateCorner(SliderFill, 3)
+        CreateGradient(SliderFill, ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Theme.Primary),
+            ColorSequenceKeypoint.new(1, Theme.Accent)
+        }, 45)
+        
+        -- FIXED: Parent the handle to SliderTrack instead of SliderFill
+        local SliderHandle = Instance.new("Frame")
+        SliderHandle.Name = "SliderHandle"
+        SliderHandle.Size = UDim2.fromOffset(20, 20)
+        SliderHandle.Position = UDim2.fromOffset(-10, -7) -- Start at the beginning
+        SliderHandle.BackgroundColor3 = Theme.Text
+        SliderHandle.BorderSizePixel = 0
+        SliderHandle.Parent = SliderTrack -- Changed from SliderFill to SliderTrack
+        
+        CreateCorner(SliderHandle, 10)
+        CreateStroke(SliderHandle, Theme.Primary, 2)
+        
+        local min = config.Min or 0
+        local max = config.Max or 100
+        local value = config.Default or min
+        local rounding = config.Rounding or 1
+        local dragging = false
+        
+        -- FIXED: Update both fill and handle position
+        local function UpdateSlider()
+            local percent = (value - min) / (max - min)
+            SliderFill.Size = UDim2.new(percent, 0, 1, 0)
+            
+            -- Update handle position based on percentage
+            local handleX = (SliderTrack.AbsoluteSize.X * percent) - 10
+            SliderHandle.Position = UDim2.fromOffset(handleX, -7)
+            
+            local roundedValue = math.floor(value * (10 ^ rounding)) / (10 ^ rounding)
+            ValueLabel.Text = tostring(roundedValue)
+            
+            if config.Callback then
+                config.Callback(roundedValue)
+            end
+        end
+        
+        local function SetValue(newValue)
+            value = math.clamp(newValue, min, max)
+            UpdateSlider()
+        end
+        
+        SliderTrack.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                local percent = math.clamp((input.Position.X - SliderTrack.AbsolutePosition.X) / SliderTrack.AbsoluteSize.X, 0, 1)
+                SetValue(min + (max - min) * percent)
+            end
+        end)
+        
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local percent = math.clamp((input.Position.X - SliderTrack.AbsolutePosition.X) / SliderTrack.AbsoluteSize.X, 0, 1)
+                SetValue(min + (max - min) * percent)
+            end
+        end)
+        
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+        
+        -- Hover effects
+        SliderHandle.MouseEnter:Connect(function()
+            CreateTween(SliderHandle, TweenInfo.new(0.2), {Size = UDim2.fromOffset(24, 24)})
+        end)
+        
+        SliderHandle.MouseLeave:Connect(function()
+            if not dragging then
+                CreateTween(SliderHandle, TweenInfo.new(0.2), {Size = UDim2.fromOffset(20, 20)})
+            end
+        end)
+        
+        UpdateSlider()
+        
+        local Slider = {
+            Value = value,
+            OnChanged = function(self, callback)
+                config.Callback = callback
+            end,
+            SetValue = function(self, newValue)
+                SetValue(newValue)
+                self.Value = value
+            end
+        }
+        
+        UpdateCanvasSize()
+        return Slider
+    end
         
         function Tab:AddDropdown(config)
             local DropdownFrame = Instance.new("Frame")
@@ -824,7 +830,7 @@ function FluentUI:CreateWindow(config)
             DropdownList.ZIndex = 10
             DropdownList.Parent = DropdownFrame
             
-            CreateCorner(DropdownList, 10)
+            CreateCorner(DropdownList, 10)w
             CreateStroke(DropdownList, Theme.BorderLight, 1)
    
             local ListScrollFrame = Instance.new("ScrollingFrame")
